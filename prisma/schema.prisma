@@ -1,0 +1,91 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum STATUS {
+  ACTIVE
+  ARCHIVED
+}
+
+enum HOSTILITY {
+  ALLIED
+  NEUTRAL
+  HOSTILE
+}
+
+model User {
+  // -- standardised
+  id                 Int                      @id @default(autoincrement())
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt @default(now())
+  status STATUS @default(ACTIVE)
+  // -- specific
+  username String @unique
+  password String
+
+  // -- relations
+  boards Board[]
+
+  @@map("user")
+}
+
+model Guest {
+  // -- standardised
+  id                 Int                      @id @default(autoincrement())
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt @default(now())
+  status STATUS @default(ACTIVE)
+  // -- specific
+  name String
+  // -- relations
+  boardId Int
+  board Board @relation(fields: [boardId], references: [id])
+  @@map("guest_user")
+}
+
+
+model Board {
+ // -- standardised
+  id                 Int                      @id @default(autoincrement())
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt @default(now())
+    status STATUS @default(ACTIVE)
+  // -- specific
+  name String
+  inviteToken String @unique @default(uuid()) @db.Uuid
+  // -- relations
+  ownerId Int
+  owner User @relation(fields: [ownerId], references: [id])
+  guests Guest[]
+  characters Character[]
+  @@map("board")
+}
+
+model Character {
+   // -- standardised
+  id                 Int                      @id @default(autoincrement())
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt @default(now())
+  status STATUS @default(ACTIVE)
+  // -- specific
+  name String
+  metaName String
+  description String
+  health Int
+  maxHealth Int
+  initiativeModifier Int
+  currentInitiative Int
+  armourClass Int
+  hostility HOSTILITY
+  isHidden Boolean
+  isPlayer Boolean
+  // -- relations
+  boardId Int
+  board Board @relation(fields: [boardId], references: [id])
+  @@map("character")
+}
