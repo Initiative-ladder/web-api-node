@@ -1,11 +1,13 @@
-import Fastify from 'fastify'
-import { setupServer, startServer } from './infrastructure/server'
-import { setupRoutes } from './routes';
+import { setupRoutes } from './routes/index.js';
+import { setupServer, startServer} from './infrastructure/server/index.js'
+import { config } from 'dotenv';
+import { startWebsocket } from './infrastructure/sockets/index.js';
 
+config();
 const server = setupServer();
 setupRoutes(server);
-//TODO: setup sockets
-startServer();
+startServer(server);
+startWebsocket(server);
 
 // /dm/login login
 // /dm/logout logout
